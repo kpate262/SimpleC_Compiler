@@ -70,9 +70,11 @@ module parser =
   and private else_part (tokens, program) =
     match tokens with
     | [] -> ([], program)
-    | hd::_ when lexer.Tokens.Semicolon = (fst hd) -> empty (tokens, program)
-    | hd::_ -> let (tail, pm) = matchToken lexer.Tokens.Else (tokens, program)
-               stmt (tail, pm)
+    | hd::_ when lexer.Tokens.Else = (fst hd) -> let (tail, pm) = matchToken lexer.Tokens.Else (tokens, program)
+                                                 stmt (tail, pm)
+    | hd::_ when lexer.Tokens.CloseBrace = (fst hd) -> (tokens, program)
+    | hd::_ -> stmt (tokens, program)
+    
   
   and private then_part (tokens, program) = 
     stmt (tokens, program)
@@ -175,7 +177,7 @@ module parser =
     //(tail, pm)
     let (tailToken, _) = List.head tail
     
-    if lexer.Tokens.Semicolon = tailToken then (tail, pm)
+    if lexer.Tokens.Semicolon = tailToken || lexer.Tokens.CloseParen = tailToken then (tail, pm)
     else (tail, pm)
          |> expr_op
          |> expr_value
