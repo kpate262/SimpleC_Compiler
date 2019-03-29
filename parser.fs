@@ -40,25 +40,59 @@ module parser =
     (tokens, program)
 
 
+  
+  let private addToLast token (tokens, program) =
+    match program with
+    | [] -> (tokens, [])
+    | hd::tail -> (tokens, (List.rev (token :: List.rev hd)) :: tail)
+  
+  let private _addToLast (tokens, program) =
+    let (token, t2) = List.head tokens
+    addToLast t2 (tokens, program)
+  
+  let private _addExpToLast (tokens, program) =
+    let (token, t2) = List.head tokens
+    //let (t1, p1) = 
+    addToLast (string token) (tokens, program)
+    |> _addToLast
+  
+  
+  
+  let find j L =
+    List.filter (fun x -> if x = j then true else false) L
+  
+  //let checkDeclared program t2 =
+ //   let list = find ["$DECL"; t2] program
+   // if (List.length list) = 0 
+  //  then addToLast program t2
+   // else let newProgram = (["$ASSIGN"] :: program)
+     //    addToLast newProgram t2
+  //
   //
   // matchToken
   //
   let private matchToken expected_token (tokens, program) =
-    let (token, _) = List.head tokens
+    let (token, t2) = List.head tokens
     //
     // if the token matches the expected token, keep parsing by
     // returning the rest of the tokens.  Otherwise throw an
     // exception because there's a syntax error, effectively 
     // stopping compilation:
     //
-    if expected_token = token then  
+    //
+    let tokenstr = (string token)
+    
+    if expected_token = token then
+      //if lexer.Tokens.Int = token then (List.tail tokens, ["$DECL"] :: program)
+      //else if lexer.Tokens.ID = token then (List.tail tokens, checkDeclared program t2 ) 
+        //   else if lexer.Tokens.Cin = token then (List.tail tokens, ["$INPUT"] :: program)
       (List.tail tokens, program)
     else
       failwith ("expecting " + (string expected_token) + ", but found " + (string token))
  
   
  // let rec private stmts (tokens, program) =
- //   stmt (tokens, program)
+ //   stmt (tokens, program)   
   
   let rec private morestmts (tokens, program) =
     let (tail, pm) = stmt (tokens, program)
@@ -83,9 +117,10 @@ module parser =
     expr (tokens, program)
   
   and private ifstmt (tokens, program) = 
-    (tokens, program)
+    (tokens, ["IF"] :: program)
     |> matchToken lexer.Tokens.If
     |> matchToken lexer.Tokens.OpenParen
+    |> _addExpToLast 
     |> condition 
     |> matchToken lexer.Tokens.CloseParen
     |> then_part
@@ -127,22 +162,26 @@ module parser =
     
        
   and private vardecl (tokens, program) =
-    (tokens, program)
-    |> matchToken lexer.Tokens.Int 
+    let innerList = []
+    (tokens, ["$DECL"] :: program)
+    |> matchToken lexer.Tokens.Int
+    |> _addToLast
     |> matchToken lexer.Tokens.ID
     |> matchToken lexer.Tokens.Semicolon
 
   and private input (tokens, program) =
-    (tokens, program)
+    (tokens, ["$INPUT"] :: program)
     |> matchToken lexer.Tokens.Cin
     |> matchToken lexer.Tokens.Input
+    |> _addToLast
     |> matchToken lexer.Tokens.ID
     |> matchToken lexer.Tokens.Semicolon
 
   and private output (tokens, program) =
-    (tokens, program)
+    (tokens, ["$OUTPUT"] :: program)
     |> matchToken lexer.Tokens.Cout
     |> matchToken lexer.Tokens.Output
+    |> _addExpToLast 
     |> output_value
     |> matchToken lexer.Tokens.Semicolon
     
@@ -166,20 +205,26 @@ module parser =
                    else failwith ("expecting expression value, but found " + (string token))  
   
   and private assignment (tokens, program) = 
-    (tokens, program)
+    (tokens, ["$ASSIGN"] :: program)
+    |> _addToLast
     |> matchToken lexer.Tokens.ID
     |> matchToken lexer.Tokens.Assign
+    |> _addExpToLast 
     |> expr 
     |> matchToken lexer.Tokens.Semicolon
   
-  and private expr (tokens, program) = 
+  and private expr (tokens, program) =
+    //(tokens, program)
+    
     let (tail, pm) = expr_value (tokens, program)
     //(tail, pm)
     let (tailToken, _) = List.head tail
     
     if lexer.Tokens.Semicolon = tailToken || lexer.Tokens.CloseParen = tailToken then (tail, pm)
     else (tail, pm)
+         |> _addToLast
          |> expr_op
+         |> _addExpToLast
          |> expr_value
   
   
