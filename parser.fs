@@ -106,7 +106,7 @@ module parser =
     | [] -> ([], program)
     | hd::_ when lexer.Tokens.Else = (fst hd) -> let (tail, pm) = matchToken lexer.Tokens.Else (tokens, program)
                                                  stmt (tail, pm)
-    | hd::_ when lexer.Tokens.CloseBrace = (fst hd) -> (tokens, program)
+    | hd::_ when lexer.Tokens.CloseBrace = (fst hd) -> empty (tokens, program)
     | hd::_ -> stmt (tokens, program)
     
   
@@ -117,7 +117,7 @@ module parser =
     expr (tokens, program)
   
   and private ifstmt (tokens, program) = 
-    (tokens, ["IF"] :: program)
+    (tokens, ["$IF"] :: program)
     |> matchToken lexer.Tokens.If
     |> matchToken lexer.Tokens.OpenParen
     |> _addExpToLast 
@@ -159,7 +159,7 @@ module parser =
     
   and private empty (tokens, program) =
     (tokens, ["$EMPTY"] :: program)
-    |> matchToken lexer.Tokens.Semicolon
+    //|> matchToken lexer.Tokens.Semicolon
     
        
   and private vardecl (tokens, program) =
