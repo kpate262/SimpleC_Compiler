@@ -107,7 +107,8 @@ module parser =
     | hd::_ when lexer.Tokens.Else = (fst hd) -> let (tail, pm) = matchToken lexer.Tokens.Else (tokens, program)
                                                  stmt (tail, pm)
     | hd::_ when lexer.Tokens.CloseBrace = (fst hd) -> empty (tokens, program)
-    | hd::_ -> stmt (tokens, program)
+    | hd::_ -> empty (tokens, program)
+               stmt (tokens, program)
     
   
   and private then_part (tokens, program) = 
