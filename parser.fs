@@ -108,7 +108,7 @@ module parser =
                                                  stmt (tail, pm)
     | hd::_ when lexer.Tokens.CloseBrace = (fst hd) -> empty (tokens, program)
     | hd::_ -> empty (tokens, program)
-               stmt (tokens, program)
+               |> stmt
     
   
   and private then_part (tokens, program) = 
@@ -145,7 +145,7 @@ module parser =
     
     if lexer.Tokens.Int = token then vardecl (tokens, program)
     else if lexer.Tokens.Cin = token then input (tokens, program)
-         else if lexer.Tokens.Semicolon = token then _empty (tokens, program)
+         else if lexer.Tokens.Semicolon = token then empty (tokens, program)
               else if lexer.Tokens.Cout = token then output (tokens, program)
                    else if lexer.Tokens.ID = token then assignment (tokens, program)
                         else if lexer.Tokens.If = token then ifstmt (tokens, program)
@@ -158,13 +158,11 @@ module parser =
     if lexer.Tokens.CloseBrace = tailToken then (tail, pm)
     else morestmts (tail, pm)
   
-  and private _empty (tokens, program) =
-    (tokens, ["$EMPTY"] :: program)
-    |> matchToken lexer.Tokens.Semicolon
-  
   and private empty (tokens, program) =
-    (tokens, ["$EMPTY"] :: program)
-    //|> matchToken lexer.Tokens.Semicolon
+    let (token, _) = List.head tokens
+    let (t1, p1) = (tokens, ["$EMPTY"] :: program)
+    if lexer.Tokens.Semicolon = token then matchToken lexer.Tokens.Semicolon (t1, p1)
+    else (t1, p1)
     
        
   and private vardecl (tokens, program) =
