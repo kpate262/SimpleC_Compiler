@@ -159,7 +159,7 @@ module parser =
     
   and private empty (tokens, program) =
     (tokens, ["$EMPTY"] :: program)
-    matchToken lexer.Tokens.Semicolon (tokens, program)
+    |> matchToken lexer.Tokens.Semicolon
     
        
   and private vardecl (tokens, program) =
