@@ -39,12 +39,12 @@ module parser =
     printfn "Program: %A" program
     (tokens, program)
 
-
   
   let private addToLast token (tokens, program) =
     match program with
     | [] -> (tokens, [])
     | hd::tail -> (tokens, (List.rev (token :: List.rev hd)) :: tail)
+  
   
   let private _addToLast (tokens, program) =
     let (token, t2) = List.head tokens
@@ -57,20 +57,10 @@ module parser =
     |> _addToLast
   
   
-  
   let find j L =
     List.filter (fun x -> if x = j then true else false) L
   
-  //let checkDeclared program t2 =
- //   let list = find ["$DECL"; t2] program
-   // if (List.length list) = 0 
-  //  then addToLast program t2
-   // else let newProgram = (["$ASSIGN"] :: program)
-     //    addToLast newProgram t2
-  //
-  //
-  // matchToken
-  //
+
   let private matchToken expected_token (tokens, program) =
     let (token, t2) = List.head tokens
     //
@@ -106,15 +96,17 @@ module parser =
     | [] -> ([], program)
     | hd::_ when lexer.Tokens.Else = (fst hd) -> let (tail, pm) = matchToken lexer.Tokens.Else (tokens, program)
                                                  stmt (tail, pm)
-    | hd::_ -> empty (tokens, program)
-    
+    | hd::_ -> stmt (tokens, program)
+               |> empty 
     
   
   and private then_part (tokens, program) = 
     stmt (tokens, program)
   
+  
   and private condition (tokens, program) = 
     expr (tokens, program)
+  
   
   and private ifstmt (tokens, program) = 
     (tokens, ["$IF"] :: program)
@@ -157,6 +149,7 @@ module parser =
     if lexer.Tokens.CloseBrace = tailToken then (tail, pm)
     else morestmts (tail, pm)
   
+  
   and private empty (tokens, program) =
     let (token, _) = List.head tokens
     let (t1, p1) = (tokens, ["$EMPTY"] :: program)
@@ -171,6 +164,7 @@ module parser =
     |> matchToken lexer.Tokens.ID
     |> matchToken lexer.Tokens.Semicolon
 
+
   and private input (tokens, program) =
     (tokens, ["$INPUT"] :: program)
     |> matchToken lexer.Tokens.Cin
@@ -179,6 +173,7 @@ module parser =
     |> matchToken lexer.Tokens.ID
     |> matchToken lexer.Tokens.Semicolon
 
+
   and private output (tokens, program) =
     (tokens, ["$OUTPUT"] :: program)
     |> matchToken lexer.Tokens.Cout
@@ -186,7 +181,8 @@ module parser =
     |> _addExpToLast 
     |> output_value
     |> matchToken lexer.Tokens.Semicolon
-    
+  
+  
   and private output_value (tokens, program) =
     let (token, _) = List.head tokens
     
@@ -206,6 +202,7 @@ module parser =
                    then matchToken lexer.Tokens.Bool_Literal (tokens, program)
                    else failwith ("expecting expression value, but found " + (string token))  
   
+  
   and private assignment (tokens, program) = 
     (tokens, ["$ASSIGN"] :: program)
     |> _addToLast
@@ -215,11 +212,9 @@ module parser =
     |> expr 
     |> matchToken lexer.Tokens.Semicolon
   
+  
   and private expr (tokens, program) =
-    //(tokens, program)
-    
     let (tail, pm) = expr_value (tokens, program)
-    //(tail, pm)
     let (tailToken, _) = List.head tail
     
     if lexer.Tokens.Semicolon = tailToken || lexer.Tokens.CloseParen = tailToken then (tail, pm)
@@ -246,13 +241,7 @@ module parser =
     | hd::_ when lexer.Tokens.NE = (fst hd) -> matchToken lexer.Tokens.NE (tokens, program)
     | hd::_ -> failwith ("expecting valid operator, but found " + (string (fst hd)))
   
-  
-  
-  
-  
-  //
-  // simpleC
-  // 
+
   let private simpleC (tokens, program) = 
     let (T1, P1) = matchToken lexer.Tokens.Void (tokens, program)
     let (T2, P2) = matchToken lexer.Tokens.Main (T1, P1)
@@ -263,19 +252,8 @@ module parser =
     let (T7, P7) = matchToken lexer.Tokens.CloseBrace (T6, P6)
     let (T8, P8) = matchToken lexer.Tokens.EOF (T7, P7)
     (T8, P8)
-  //
-  // parse tokens
-  //
-  // Given a list of tokens, parses the list and determines
-  // if the list represents a valid simple C program.  Returns
-  // a tuple containing 3 values:  
-  //
-  //   (result, msg, program)
-  //
-  // where result is true or false (legal or not legal), 
-  // msg is a success or syntax error message, and program
-  // is a list of instructions if parsing was successful.
-  //
+
+
   let parse tokens = 
     try
       let (_, program) = simpleC (tokens, [])
