@@ -158,11 +158,11 @@ module parser =
     else morestmts (tail, pm)
     
   and private empty (tokens, program) =
+    (tokens, ["$EMPTY"] :: program)
     matchToken lexer.Tokens.Semicolon (tokens, program)
     
        
   and private vardecl (tokens, program) =
-    let innerList = []
     (tokens, ["$DECL"] :: program)
     |> matchToken lexer.Tokens.Int
     |> _addToLast
