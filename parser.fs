@@ -70,7 +70,7 @@ module parser =
     // stopping compilation:
     //
     //
-    let tokenstr = (string token)d
+    let tokenstr = (string token)
     
     if expected_token = token then
       //if lexer.Tokens.Int = token then (List.tail tokens, ["$DECL"] :: program)
