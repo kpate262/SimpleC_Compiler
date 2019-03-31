@@ -70,7 +70,7 @@ module parser =
     // stopping compilation:
     //
     //
-    let tokenstr = (string token)
+    let tokenstr = (string token)d
     
     if expected_token = token then
       //if lexer.Tokens.Int = token then (List.tail tokens, ["$DECL"] :: program)
@@ -96,8 +96,7 @@ module parser =
     | [] -> ([], program)
     | hd::_ when lexer.Tokens.Else = (fst hd) -> let (tail, pm) = matchToken lexer.Tokens.Else (tokens, program)
                                                  stmt (tail, pm)
-    | hd::_ -> stmt (tokens, program)
-               |> empty 
+    | hd::_ -> (tokens, ["$EMPTY"] :: program)
     
   
   and private then_part (tokens, program) = 
@@ -151,10 +150,9 @@ module parser =
   
   
   and private empty (tokens, program) =
-    let (token, _) = List.head tokens
-    let (t1, p1) = (tokens, ["$EMPTY"] :: program)
-    if lexer.Tokens.Semicolon = token then matchToken lexer.Tokens.Semicolon (t1, p1)
-    else (t1, p1)
+    (tokens, ["$EMPTY"] :: program)
+    |> matchToken lexer.Tokens.Semicolon
+    
     
        
   and private vardecl (tokens, program) =
