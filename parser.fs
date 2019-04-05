@@ -119,27 +119,27 @@ module parser =
   
   
   and private stmt (tokens, program) =
-   // match tokens with
-   // | [] -> ([], program)
-    //| hd::_ when lexer.Tokens.CloseBrace = (fst hd) -> (tokens, program)
-   // | hd::_ when lexer.Tokens.Int = (fst hd) -> vardecl (tokens, program)
-   // | hd::_ when lexer.Tokens.Cin = (fst hd) -> input (tokens, program)
-    //| hd::_ when lexer.Tokens.Semicolon = (fst hd) -> empty (tokens, program)
-    //| hd::_ when lexer.Tokens.Output = (fst hd) -> output (tokens, program)
-   // | hd::_ when lexer.Tokens.Assign = (fst hd) -> assignment (tokens, program)
-   // | hd::_  -> ifstmt (tokens, program)
+    match tokens with
+    | [] -> ([], program)
+    | hd::_ when lexer.Tokens.Int = (fst hd) -> vardecl (tokens, program)
+    | hd::_ when lexer.Tokens.Cin = (fst hd) -> input (tokens, program)
+    | hd::_ when lexer.Tokens.Semicolon = (fst hd) -> empty (tokens, program)
+    | hd::_ when lexer.Tokens.Cout = (fst hd) -> output (tokens, program)
+    | hd::_ when lexer.Tokens.ID = (fst hd) -> assignment (tokens, program)
+    | hd::_ when lexer.Tokens.If = (fst hd) -> ifstmt (tokens, program)
+    | hd::_ -> failwith ("expecting valid expression, but found " + (string (fst hd)))
     
   
   
-    let (token, _) = List.head tokens
+    //let (token, _) = List.head tokens
     
-    if lexer.Tokens.Int = token then vardecl (tokens, program)
-    else if lexer.Tokens.Cin = token then input (tokens, program)
-         else if lexer.Tokens.Semicolon = token then empty (tokens, program)
-              else if lexer.Tokens.Cout = token then output (tokens, program)
-                   else if lexer.Tokens.ID = token then assignment (tokens, program)
-                        else if lexer.Tokens.If = token then ifstmt (tokens, program)
-                             else failwith ("expecting valid expression, but found " + (string token))
+    //if lexer.Tokens.Int = token then vardecl (tokens, program)
+    //else if lexer.Tokens.Cin = token then input (tokens, program)
+    //     else if lexer.Tokens.Semicolon = token then empty (tokens, program)
+     //         else if lexer.Tokens.Cout = token then output (tokens, program)
+     //              else if lexer.Tokens.ID = token then assignment (tokens, program)
+       //                 else if lexer.Tokens.If = token then ifstmt (tokens, program)
+        //                     else failwith ("expecting valid expression, but found " + (string token))
                                   
   
   and private stmts (tokens, program) =
@@ -189,16 +189,26 @@ module parser =
     
     
   and private expr_value (tokens, program) = 
-    let (token, _) = List.head tokens
+    match tokens with
+    | [] -> ([], program)
+    | hd::tail when lexer.Tokens.ID = (fst hd) -> matchToken lexer.Tokens.ID (tokens, program)
+    | hd::tail when lexer.Tokens.Int_Literal = (fst hd) -> matchToken lexer.Tokens.Int_Literal (tokens, program)
+    | hd::tail when lexer.Tokens.Str_Literal = (fst hd) -> matchToken lexer.Tokens.Str_Literal (tokens, program)
+    | hd::tail when lexer.Tokens.Bool_Literal = (fst hd) -> matchToken lexer.Tokens.Bool_Literal (tokens, program)
+    | hd::tail -> failwith ("expecting expression value, but found " + (string (fst hd)))
+  
+  
+  
+    //let (token, _) = List.head tokens
     
-    if lexer.Tokens.ID = token then matchToken lexer.Tokens.ID (tokens, program)
-    else if lexer.Tokens.Int_Literal = token 
-         then matchToken lexer.Tokens.Int_Literal (tokens, program)
-         else if lexer.Tokens.Str_Literal = token 
-              then matchToken lexer.Tokens.Str_Literal (tokens, program)
-              else if lexer.Tokens.Bool_Literal = token 
-                   then matchToken lexer.Tokens.Bool_Literal (tokens, program)
-                   else failwith ("expecting expression value, but found " + (string token))  
+    //if lexer.Tokens.ID = token then matchToken lexer.Tokens.ID (tokens, program)
+    //else if lexer.Tokens.Int_Literal = token 
+     //    then matchToken lexer.Tokens.Int_Literal (tokens, program)
+      //   else if lexer.Tokens.Str_Literal = token 
+       //       then matchToken lexer.Tokens.Str_Literal (tokens, program)
+        //      else if lexer.Tokens.Bool_Literal = token 
+           //        then matchToken lexer.Tokens.Bool_Literal (tokens, program)
+                 //  else failwith ("expecting expression value, but found " + (string token))  
   
   
   and private assignment (tokens, program) = 
